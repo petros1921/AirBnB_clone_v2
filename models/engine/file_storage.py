@@ -18,7 +18,7 @@ class FileStorage:
             del self.__object[key]
             self.save()
 
-    def all(self, cls-None):
+    def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
         return FileStorage.__objects
 
