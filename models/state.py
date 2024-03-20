@@ -9,7 +9,7 @@ import shlex
 from sqlalchemy.ext.declarative import declarative_base
 
 
-class State(BaseModel):
+class State(BaseModel, Base):
     """ This is the State class with an input_name """
     __tablename__ = "states"
     name = Column(String(128), nullable=False)

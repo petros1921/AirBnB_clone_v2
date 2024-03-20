@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Float
 
 
-class Review(BaseModel):
+class Review(BaseModel, Base):
     """ Review classto store review place_id, user_id text """
 
     __tablename__ = "reviews"
