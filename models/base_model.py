@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
+import models
 
 Base = declarative_base()
 
@@ -17,30 +18,35 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
-        if not kwargs:
-            from models import storage
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            storage.new(self)
+        if kwargs:
+            for n, m in kwargs.items():
+                if n == "created_at" or n == "updated_at":
+                    m = datetime.strptime(m, "%Y-%m-%dT%H:%M:%S.%f")
+                if n != "__class__":
+                    setattr(self, n, m)
+            if "id" not in kwargs:
+                self.id = str(uuid.uuid4())
+            if "created_at" not in kwargs:
+                self.created_at = datetime.now()
+            if "updated_at" not in kwargs:
+                self.updated_at = datetime.now()
         else:
-            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            del kwargs['__class__']
-            self.__dict__.update(kwargs)
+            self.id = str(uuid.uuid4())
+            self.created_at = self.updated_at = datetime.now()
 
     def __str__(self):
-        """Returns a string representation of the instance"""
-        cls = (str(type(self)).split('.')[-1]).split('\'')[0]
-        return '[{}] ({}) {}'.format(cls, self.id, self.__dict__)
+        """Returns a string of a class with a name and id and dic"""
+        return "[{}] ({}) {}".format(
+            type(self).__name__, self.id, self.__dict__)
+    def __repr__(self):
+        """it will return a string rep"""
+        return self.__str__()
 
     def save(self):
-        """Updates updated_at with current time when instance is changed"""
-        from models import storage
+        """Updates updated_at to the current instance"""
         self.updated_at = datetime.now()
-        storage.save()
+        models.storage.new(self)
+        models.storage.save()
 
     def to_dict(self):
         """Convert instance into dict format"""
@@ -53,6 +59,5 @@ class BaseModel:
         return dictionary
 
     def delete(self):
-        """ objects will be delated
-        """
+        """ objects will be delated """
         models.storage.delete(self)
